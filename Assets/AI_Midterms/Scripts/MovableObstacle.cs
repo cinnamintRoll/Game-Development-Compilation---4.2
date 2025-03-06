@@ -2,30 +2,33 @@ using UnityEngine;
 
 public class MovableObstacle : MonoBehaviour
 {
-      [SerializeField] private float speedForward;
-    //[SerializeField] private float speedBackward;
+    [SerializeField] private float _speedForward; // Speed of the obstacle movement
+    private bool _isMovingForward = true; // Tracks the current movement direction
 
-    private bool isSwitchDir;
-    
-    void Update()
+    private const float MaxZPosition = 2f; // Maximum Z position for direction switch
+    private const float MinZPosition = -2f; // Minimum Z position for direction switch
+
+    private void Update()
     {
-        if (!isSwitchDir) 
-        {
-            transform.Translate(Vector3.forward * speedForward * Time.deltaTime);
-        }
+        MoveObstacle();
+        CheckAndSwitchDirection();
+    }
 
-        else 
-        {
-            transform.Translate(Vector3.back * speedForward * Time.deltaTime);
-        }
+    private void MoveObstacle()
+    {
+        Vector3 movementDirection = _isMovingForward ? Vector3.forward : Vector3.back;
+        transform.Translate(movementDirection * _speedForward * Time.deltaTime);
+    }
 
-        if (transform.position.z >= 2) 
+    private void CheckAndSwitchDirection()
+    {
+        if (transform.position.z >= MaxZPosition)
         {
-            isSwitchDir = true;
+            _isMovingForward = false; // Switch to moving backward
         }
-        else if (transform.position.z <= -2) 
+        else if (transform.position.z <= MinZPosition)
         {
-            isSwitchDir= false;
+            _isMovingForward = true; // Switch to moving forward
         }
     }
 }

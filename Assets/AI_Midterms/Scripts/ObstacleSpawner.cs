@@ -1,52 +1,80 @@
-using UnityEngine;
 using Unity.AI.Navigation;
+using UnityEngine;
+
 public class ObstacleSpawner : MonoBehaviour
 {
-    [SerializeField] private NavMeshSurface meshSurface;
-    [SerializeField] private GameObject obstaclePrefab;
+    [SerializeField] private NavMeshSurface meshSurface; // Reference to the NavMeshSurface
+    [SerializeField] private GameObject obstaclePrefab;   // Prefab for the obstacle
 
-    [SerializeField] private int numberOfSpawn;
-    [SerializeField] private Vector2 spawnPosition;
-    [SerializeField] private Vector2 spawnSize;
-    [SerializeField] private LayerMask floorMask;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [SerializeField] private int numberOfSpawn;           // Number of obstacles to spawn
+    [SerializeField] private Vector2 spawnPositionRange;  // Range for spawn positions (X and Z)
+    [SerializeField] private Vector2 spawnSizeRange;     // Range for obstacle sizes (X and Z)
+    [SerializeField] private LayerMask floorMask;         // Layer mask for the floor
+
+    private void Start()
     {
-        for(int i = 0; i < numberOfSpawn;) 
-        {
-            float xPos = Random.Range(spawnPosition.x, spawnPosition.y);
-            float zPos = Random.Range(spawnPosition.x, spawnPosition.y);
-
-            Vector3 newPos = new Vector3(xPos, transform.position.y, zPos);
-
-            float xSize = Random.Range(spawnSize.x, spawnSize.y);
-            float zSize = Random.Range(spawnSize.x, spawnSize.y);
-
-            Vector3 newSize = new Vector3(xSize, 1, zSize);
-
-            Ray ray = new Ray(newPos, Vector3.down);
-            RaycastHit hit;
-
-            if (Physics.Raycast(ray, out hit, 100, floorMask)) 
-            {
-                Collider[] colliders = Physics.OverlapSphere(hit.point, SphereRadius(xSize, zSize));
-                if(colliders.Length == 1) 
-                {
-                    Vector3 newObsPos = new Vector3(hit.point.x, 0.5f, hit.point.z);
-                    GameObject newObstacle = Instantiate(obstaclePrefab, newObsPos, Quaternion.identity);
-                    newObstacle.transform.localScale = new Vector3(xSize, 1, zSize);
-                    i++;
-                }
-            }
-        }
-        meshSurface.BuildNavMesh();
+        SpawnObstacles();
+        meshSurface.BuildNavMesh(); // Rebuild the NavMesh after spawning obstacles
     }
 
-    private float SphereRadius(float xSize, float zSize) 
+    private void SpawnObstacles()
     {
-        if(xSize > zSize)
-            return xSize;
+        int spawnedCount = 0;
 
-            return zSize;
+        while (spawnedCount < numberOfSpawn)
+        {
+            Vector3 spawnPosition = GenerateRandomPosition();
+            Vector3 spawnSize = GenerateRandomSize();
+
+            if (TryFindValidSpawnPoint(spawnPosition, spawnSize, out Vector3 validPosition))
+            {
+                SpawnObstacle(validPosition, spawnSize);
+                spawnedCount++;
+            }
+        }
+    }
+
+    private Vector3 GenerateRandomPosition()
+    {
+        float xPos = Random.Range(spawnPositionRange.x, spawnPositionRange.y);
+        float zPos = Random.Range(spawnPositionRange.x, spawnPositionRange.y);
+        return new Vector3(xPos, transform.position.y, zPos);
+    }
+
+    private Vector3 GenerateRandomSize()
+    {
+        float xSize = Random.Range(spawnSizeRange.x, spawnSizeRange.y);
+        float zSize = Random.Range(spawnSizeRange.x, spawnSizeRange.y);
+        return new Vector3(xSize, 1, zSize);
+    }
+
+    private bool TryFindValidSpawnPoint(Vector3 position, Vector3 size, out Vector3 validPosition)
+    {
+        Ray ray = new Ray(position, Vector3.down);
+        if (Physics.Raycast(ray, out RaycastHit hit, 100, floorMask))
+        {
+            float radius = CalculateSphereRadius(size.x, size.z);
+            Collider[] colliders = Physics.OverlapSphere(hit.point, radius);
+
+            if (colliders.Length == 1) // Only the floor should be detected
+            {
+                validPosition = new Vector3(hit.point.x, 0.5f, hit.point.z);
+                return true;
+            }
+        }
+
+        validPosition = Vector3.zero;
+        return false;
+    }
+
+    private void SpawnObstacle(Vector3 position, Vector3 size)
+    {
+        GameObject newObstacle = Instantiate(obstaclePrefab, position, Quaternion.identity);
+        newObstacle.transform.localScale = size;
+    }
+
+    private float CalculateSphereRadius(float xSize, float zSize)
+    {
+        return Mathf.Max(xSize, zSize); // Return the larger of the two sizes
     }
 }
