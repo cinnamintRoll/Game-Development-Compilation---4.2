@@ -6,13 +6,13 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 0
-    path: Assets/Netcode for Game Objects/Scenes/Multiplayer Menu.unity
+    path: Assets/_Project2-Netcode for Game Objects/Scenes/Multiplayer Menu.unity
     guid: 3c4aa835aa283484e86f037de178934c
   - enabled: 1
-    path: Assets/Netcode for Game Objects/Scenes/NetcodeForGames.unity
+    path: Assets/_Project2-Netcode for Game Objects/Scenes/NetcodeForGames.unity
     guid: 5453a1d57b30f8d48b236bb656ca9d1b
   - enabled: 1
-    path: Assets/Netcode for Game Objects/Scenes/FinalMultiplayerLobby.unity
+    path: Assets/_Project2-Netcode for Game Objects/Scenes/FinalMultiplayerLobby.unity
     guid: 5f8d24792e5e0e448a03e41ef355708f
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0
