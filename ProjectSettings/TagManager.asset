@@ -7,6 +7,8 @@ TagManager:
   - Crate
   - Dirt
   - CinemachineTarget
+  - Collectible
+  - ExtractionPoint
   layers:
   - Default
   - TransparentFX

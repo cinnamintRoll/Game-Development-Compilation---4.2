@@ -1,13 +1,9 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.AI;
 using UnityEngine.UI;
 
-public class PlayerController : MonoBehaviour
+public class PlayerManager : MonoBehaviour
 {
-    [SerializeField] private Camera cam;
-    [SerializeField] private NavMeshAgent agent;
-
     [Header("Collection Settings")]
     public int collectedItems = 0;
     public int requiredItems = 3;
@@ -17,40 +13,20 @@ public class PlayerController : MonoBehaviour
     public bool allItemsCollected = false;
     public GameObject winPanel;
 
-    private void Start()
+    private Rigidbody rb;
+
+    void Start()
     {
-        // Make sure we have references to required components
-        if (agent == null)
-            agent = GetComponent<NavMeshAgent>();
-
-        if (cam == null)
-            cam = Camera.main;
-
+        rb = GetComponent<Rigidbody>();
         UpdateCollectionUI();
 
-        // Ensure win panel is hidden at start
         if (winPanel != null)
         {
             winPanel.SetActive(false);
         }
     }
 
-    private void Update()
-    {
-        // Click-to-move using NavMeshAgent
-        if (Input.GetMouseButtonDown(0))
-        {
-            Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-
-            if (Physics.Raycast(ray, out hit))
-            {
-                agent.SetDestination(hit.point);
-            }
-        }
-    }
-
-    private void OnTriggerEnter(Collider other)
+    void OnTriggerEnter(Collider other)
     {
         // Check if player collided with a collectible
         if (other.CompareTag("Collectible"))
@@ -65,12 +41,12 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void CollectItem(GameObject item)
+    void CollectItem(GameObject item)
     {
         collectedItems++;
         UpdateCollectionUI();
 
-        // Disable the collectible
+        // Disable the collectible (alternative to Destroy to avoid errors)
         item.SetActive(false);
 
         // Check if all items are collected
@@ -81,7 +57,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void UpdateCollectionUI()
+    void UpdateCollectionUI()
     {
         if (collectionCounterText != null)
         {
@@ -89,7 +65,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void WinGame()
+    void WinGame()
     {
         Debug.Log("Game Won!");
 
@@ -97,12 +73,6 @@ public class PlayerController : MonoBehaviour
         if (winPanel != null)
         {
             winPanel.SetActive(true);
-        }
-
-        // Disable player movement
-        if (agent != null)
-        {
-            agent.isStopped = true;
         }
     }
 }
